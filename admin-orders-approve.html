@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin đơn hàng | Tài xế lái hộ Huế</title>
+  <style>
+    :root{
+      --primary:#1d4ed8; --primary2:#2563eb; --dark:#0b1220; --text:#0f172a;
+      --muted:#64748b; --line:#e2e8f0; --bg:#f3f6fb; --card:#fff; --soft:#eff6ff;
+      --success:#059669; --warning:#d97706; --danger:#dc2626; --radius:24px;
+      --shadow:0 18px 50px rgba(15,23,42,.08); --max:1180px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+    .container{width:min(var(--max), calc(100% - 32px));margin:auto}
+    .topbar{background:#081120;color:#dbe3ef}
+    .topbar .container{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap}
+    a{text-decoration:none;color:inherit}
+    .btn{border:none;cursor:pointer;border-radius:16px;padding:12px 16px;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-primary{color:#fff;background:linear-gradient(135deg,var(--primary2),var(--primary))}
+    .btn-outline{background:#fff;color:var(--text);border:1px solid #cbd5e1}
+    .btn-success{background:var(--success);color:#fff}
+    .btn-warning{background:var(--warning);color:#fff}
+    .btn-danger{background:var(--danger);color:#fff}
+    .hero{padding:28px 0 18px}
+    .hero-card,.card{background:#fff;border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);padding:24px}
+    .hero h1{margin:0 0 8px;font-size:38px}
+    .hero p{margin:0;color:var(--muted);font-size:18px}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:20px;padding-bottom:40px}
+    .stats{display:grid;gap:14px}
+    .stat{border:1px solid var(--line);border-radius:22px;padding:18px;background:#f8fbff}
+    .big{font-size:30px;font-weight:900}
+    .muted{color:var(--muted)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .list{display:grid;gap:14px}
+    .order{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:18px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .pill{display:inline-block;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:800}
+    .pill.pending{background:#fff7ed;color:#9a3412}
+    .pill.approved{background:#ecfdf5;color:#065f46}
+    .pill.rejected{background:#fef2f2;color:#991b1b}
+    .head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}
+    .meta{display:grid;gap:8px;color:#334155}
+    .empty{padding:24px;border:1px dashed #cbd5e1;border-radius:20px;text-align:center;color:var(--muted);background:#f8fafc}
+    .login-wrap{position:fixed;inset:0;background:rgba(2,8,23,.42);display:flex;align-items:center;justify-content:center;padding:18px}
+    .login-card{width:min(480px,100%);background:#fff;border-radius:28px;padding:26px;box-shadow:0 30px 80px rgba(2,8,23,.28)}
+    input{width:100%;padding:15px 16px;border-radius:16px;border:1px solid #cbd5e1;font-size:15px;outline:none}
+    .hidden{display:none!important}
+    @media (max-width: 900px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.hero h1{font-size:32px}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="container">
+      <div>Trang admin riêng • xem đơn và duyệt đơn</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a class="btn btn-outline" href="website-hue-customer-distance-admin.html">Về trang khách</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-card">
+        <h1>Admin đơn hàng</h1>
+        <p>Xem đơn mới, duyệt đơn, từ chối đơn và quản lý trạng thái ngay trên web.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container grid">
+      <div class="card">
+        <h2 style="margin-top:0">Tổng quan</h2>
+        <div class="stats">
+          <div class="stat"><div class="muted">Tổng đơn</div><div class="big" id="totalOrders">0</div></div>
+          <div class="stat"><div class="muted">Chờ duyệt</div><div class="big" id="pendingOrders">0</div></div>
+          <div class="stat"><div class="muted">Đã duyệt</div><div class="big" id="approvedOrders">0</div></div>
+          <div class="stat"><div class="muted">Từ chối</div><div class="big" id="rejectedOrders">0</div></div>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="renderOrders()">Làm mới</button>
+          <button class="btn btn-danger" onclick="clearOrders()">Xóa hết đơn</button>
+        </div>
+        <p class="muted">Lưu ý: bản này lưu bằng trình duyệt. Muốn xem đơn trên nhiều máy thì bước sau nên nối Google Sheets hoặc Firebase.</p>
+      </div>
+
+      <div>
+        <div id="orderList" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-card">
+      <h2 style="margin-top:0">Mở trang admin</h2>
+      <p class="muted">Nhập mật khẩu để xem và duyệt đơn.</p>
+      <input id="adminPassword" type="password" placeholder="Nhập mật khẩu admin">
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="checkPassword()">Vào admin</button>
+      </div>
+      <p class="muted">Mật khẩu mặc định: <b>hueadmin123</b></p>
+      <div id="loginMsg" class="muted"></div>
+    </div>
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = 'hueadmin123';
+    const DRIVER_ORDERS_KEY = 'driverOrdersV2';
+
+    function getOrders() {
+      try {
+        const data = JSON.parse(localStorage.getItem(DRIVER_ORDERS_KEY) || '[]');
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveOrders(orders) {
+      localStorage.setItem(DRIVER_ORDERS_KEY, JSON.stringify(orders));
+    }
+
+    function pillClass(status) {
+      if (status === 'Đã duyệt') return 'approved';
+      if (status === 'Từ chối') return 'rejected';
+      return 'pending';
+    }
+
+    function renderOrders() {
+      const orders = getOrders().reverse();
+      document.getElementById('totalOrders').textContent = orders.length;
+      document.getElementById('pendingOrders').textContent = orders.filter(o => (o.status || 'Chờ duyệt') === 'Chờ duyệt').length;
+      document.getElementById('approvedOrders').textContent = orders.filter(o => o.status === 'Đã duyệt').length;
+      document.getElementById('rejectedOrders').textContent = orders.filter(o => o.status === 'Từ chối').length;
+
+      const wrap = document.getElementById('orderList');
+      if (!orders.length) {
+        wrap.innerHTML = '<div class="empty">Chưa có đơn nào trên trình duyệt này.</div>';
+        return;
+      }
+
+      wrap.innerHTML = orders.map(o => `
+        <div class="order">
+          <div class="head">
+            <div>
+              <strong>${o.name || 'Khách hàng'}</strong><br>
+              <span class="muted">${o.phone || ''} • ${o.id || ''}</span>
+            </div>
+            <span class="pill ${pillClass(o.status || 'Chờ duyệt')}">${o.status || 'Chờ duyệt'}</span>
+          </div>
+
+          <div class="row">
+            <div class="meta">
+              <div><b>Điểm đón:</b> ${o.pickup || '-'}</div>
+              <div><b>Điểm đến:</b> ${o.dropoff || '-'}</div>
+              <div><b>Thời gian:</b> ${o.time || '-'}</div>
+              <div><b>Dịch vụ:</b> ${o.service || '-'}</div>
+            </div>
+            <div class="meta">
+              <div><b>Khoảng cách:</b> ${o.distanceText || '-'}</div>
+              <div><b>Giá tạm tính:</b> ${o.priceText || '-'}</div>
+              <div><b>Tạo lúc:</b> ${o.createdAt || '-'}</div>
+              <div><b>Ghi chú:</b> ${o.note || 'Không có'}</div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <button class="btn btn-success" onclick="updateStatus('${o.id}', 'Đã duyệt')">Duyệt đơn</button>
+            <button class="btn btn-warning" onclick="updateStatus('${o.id}', 'Chờ duyệt')">Đưa về chờ duyệt</button>
+            <button class="btn btn-danger" onclick="updateStatus('${o.id}', 'Từ chối')">Từ chối</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateStatus(id, status) {
+      const orders = getOrders();
+      const idx = orders.findIndex(o => o.id === id);
+      if (idx === -1) return;
+      orders[idx].status = status;
+      saveOrders(orders);
+      renderOrders();
+    }
+
+    function clearOrders() {
+      if (!confirm('Bạn chắc chắn muốn xóa toàn bộ đơn?')) return;
+      localStorage.removeItem(DRIVER_ORDERS_KEY);
+      renderOrders();
+    }
+
+    function checkPassword() {
+      const val = document.getElementById('adminPassword').value;
+      const msg = document.getElementById('loginMsg');
+      if (val === ADMIN_PASSWORD) {
+        document.getElementById('loginWrap').classList.add('hidden');
+        sessionStorage.setItem('driverAdminUnlockedV2', '1');
+        renderOrders();
+      } else {
+        msg.textContent = 'Sai mật khẩu rồi.';
+        msg.style.color = '#dc2626';
+      }
+    }
+
+    window.addEventListener('load', function() {
+      if (sessionStorage.getItem('driverAdminUnlockedV2') === '1') {
+        document.getElementById('loginWrap').classList.add('hidden');
+        renderOrders();
+      }
+    });
+  </script>
+</body>
+</html>
